@@ -1,0 +1,37 @@
+# 1. 로컬 환경 디렉터리 및 파일 (Local Environment)
+#    : terraform init 시 다운로드되는 제공자(provider) 및 모듈이 저장되는 폴더
+**/.terraform/*
+
+# 2. 테라폼 상태 파일 (State Files)
+#    : 현재 인프라 상태와 민감 정보(Secrets)가 포함될 수 있으며, 
+#      일반적으로 S3, Azure Storage, GCS 등의 원격 백엔드(Remote Backend)에 저장되어야 합니다.
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# 3. 자동 변수 파일 (Variable Definition Files - 민감 정보 포함 가능성)
+#    : 비밀번호, 키, 엔드포인트 등 민감한 데이터가 포함될 수 있는 파일
+#      단, 환경별 tfvars 파일을 Git에 포함하여 관리하는 경우도 있으므로,
+#      민감한 정보가 없는 tfvars 파일은 제외할 수 있습니다.
+#      (일반적으로는 무시하는 것이 안전합니다.)
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# 4. 계획 파일 (Plan Output Files)
+#    : 'terraform plan -out=tfplan' 명령으로 생성되는 파일
+*.tfplan
+*tfplan*
+
+# 5. 오버라이드 파일 (Override Files)
+#    : 로컬 환경에서 테스트 목적으로 사용되는 경우가 많아 커밋하지 않습니다.
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# 6. 로그 및 기타 임시 파일 (Logs and Misc)
+#    : 실행 중 발생하는 충돌(crash) 로그 파일
+crash.log
+crash.*.log
