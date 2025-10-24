@@ -28,7 +28,7 @@ pipeline {
                 echo "Building and pushing Docker image..."
                 sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-                sh "docker build -t ${ECR_REPO_NAME}:${IMAGE_TAG} backend/"
+                sh "docker build -t ${ECR_REPO_NAME}:${IMAGE_TAG} -f backend/Dockerfile ."
 
                 sh "docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}"
 
