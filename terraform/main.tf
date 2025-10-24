@@ -1344,3 +1344,10 @@ resource "aws_iam_role_policy_attachment" "jenkins_ecs_policy" {
   role       = aws_iam_role.lts_jenkins_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
 }
+
+resource "aws_iam_role_policy_attachment" "jenkins_admin_policy" {
+  role       = aws_iam_role.lts_jenkins_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+
+  depends_on = [aws_iam_role.lts_jenkins_role]
+}
