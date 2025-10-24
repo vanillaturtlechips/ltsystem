@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     --no-install-recommends \
     python3-dev \
+    pkg-config \
 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
