@@ -10,4 +10,4 @@ python manage.py collectstatic --noinput --clear
 
 # 3. Gunicorn으로 애플리케이션 실행
 echo "Starting Gunicorn on 0.0.0.0:80..."
-gunicorn wsgi:application --bind 0.0.0.0:80
+gunicorn lts_project.wsgi:application --bind 0.0.0.0:80
