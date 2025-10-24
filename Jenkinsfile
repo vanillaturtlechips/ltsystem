@@ -6,6 +6,10 @@ pipeline {
     environment {
         AWS_REGION = 'ap-northeast-2'
         TF_DIR     = 'terraform' 
+
+        AWS_ACCOUNT_ID = '820313036770'
+        ECR_REPO_NAME  = 'lts-app-repo'
+        IMAGE_TAG      = "latest"
     }
 
     
@@ -17,6 +21,20 @@ pipeline {
                 echo "Checking out source code from Git..."
                 checkout scm
             }
+        }
+
+        stage('Build & Push to ECR') {
+            steps {
+                echo "Building and pushing Docker image..."
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+                sh "docker build -t ${ECR_REPO_NAME}:${IMAGE_TAG} backend/"
+
+                sh "docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}"
+
+                sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}"
+            }
+
         }
 
         
@@ -31,7 +49,6 @@ pipeline {
         
         stage('Terraform Plan') {
             steps {
-                // 인프라 변경 계획을 생성하고 tfplan 파일로 저장
                 echo "Running Terraform Plan..."
                 sh "cd ${TF_DIR} && terraform plan -out=tfplan"
             }
@@ -42,7 +59,7 @@ pipeline {
             steps {
                 
                 echo "Waiting for manual approval to apply changes..."
-                input 'Terraform Apply를 실행할까요?'
+                input 'Terraform Apply?'
             }
         }
 

@@ -7,6 +7,13 @@ terraform {
   }
 }
 
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+locals {
+  image_tag = "latest"
+}
+
 provider "aws" {
     region = "ap-northeast-2"
 }
@@ -425,6 +432,26 @@ resource "aws_ecs_cluster" "lts_cluster" {
     }
 }
 
+resource "aws_ecr_repository" "lts_app_repo" {
+    name = "lts-app-repo"
+
+    image_tag_mutability = "MUTABLE"
+
+    image_scanning_configuration {
+        scan_on_push = true
+    }
+
+    tags = {
+        Name = "lts-app-repo"
+    }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_ecr_policy" {
+    role = aws_iam_role.lts_ecs_task_execution_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+
 resource "aws_iam_role" "lts_ecs_task_execution_role" {
     name = "lts-ecs-task-execution-role"
 
@@ -464,14 +491,36 @@ resource "aws_ecs_task_definition" "lts_app_task" {
     container_definitions = jsonencode([
         {
             name = "lts-app-container"
-            image = "nginxdemos/hello"
+            image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/${aws_ecr_repository.lts_app_repo.name}:${local.image_tag}"
             essential = true
             portMappings = [
                 {
                     containerPort = 80
                     hostPort = 80
                 }
-            ]
+                ]
+
+            environment = [
+                {
+                    name = "DATABASE_URL"
+                    value = "mysql://admin:${aws_secretsmanager_secret_version.lts_db_password_version.secret_string}@${aws_db_instance.lts_db.endpoint}/${aws_db_instance.lts_db.identifier}"   
+                },
+                {
+                    name = "DEBUG"
+                    value = "False"
+                }
+                ]
+            secrets = [
+                {
+                    name = "SECRET_KEY"
+                    valueFrom = aws_secretsmanager_secret.lts_django_secret_key.arn
+                },
+                {
+                    name = "DB_PASSWORD_PLACEHOLDER"
+                    valueFrom = aws_secretsmanager_secret.lts_db_password_secret.arn
+                }
+                ]
+
                 logConfiguration = {
                     logDriver = "awslogs"
                     options = {
@@ -482,6 +531,12 @@ resource "aws_ecs_task_definition" "lts_app_task" {
                 }
         }
     ])
+
+    depends_on = [
+        aws_ecr_repository.lts_app_repo,
+        aws_iam_role_policy_attachment.ecs_secrets_attachment
+    ]
+
 }
 
 resource "aws_cloudwatch_log_group" "lts_ecs_logs" {
@@ -1350,4 +1405,40 @@ resource "aws_iam_role_policy_attachment" "jenkins_admin_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 
   depends_on = [aws_iam_role.lts_jenkins_role]
+}
+
+
+resource "aws_secretsmanager_secret" "lts_django_secret_key" {
+    name = "lts/django/secretkey"
+    description = "Django SECRET_KEY for LTS system"
+    recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "lts_django_secret_key_version" {
+    secret_id = aws_secretsmanager_secret.lts_django_secret_key.id
+    secret_string = "django-insecure-dummy-key-for-lts-project"
+}
+
+resource "aws_iam_policy" "lts_ecs_task_exec_secrets_policy" {
+    name = "lts-ecs-task-exec-secrets-policy"
+    description = "Allow ECS Task to read specific secrets"
+    
+    policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Effect   = "Allow"
+                Action   = ["secretsmanager:GetSecretValue"]
+                Resource = [
+                    aws_secretsmanager_secret.lts_db_password_secret.arn,
+                    aws_secretsmanager_secret.lts_django_secret_key.arn
+                ]
+            }
+        ]
+    }) 
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_secrets_attachment" {
+  role       = aws_iam_role.lts_ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.lts_ecs_task_exec_secrets_policy.arn
 }
