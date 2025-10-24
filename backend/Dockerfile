@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     python3-dev \
     pkg-config \
+    dos2unix \
 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -15,7 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh \
+    && dos2unix /app/entrypoint.sh
 
 EXPOSE 80
 
