@@ -1203,7 +1203,8 @@ resource "aws_cloudfront_distribution" "lts_cdn" {
     origin {
         domain_name = split("/", replace(aws_api_gateway_stage.lts_api_stage.invoke_url, "https://", ""))[0]
 
-        origin_path = "/${aws_api_gateway_stage.lts_api_stage.stage_name}"
+        # origin_path = "/${aws_api_gateway_stage.lts_api_stage.stage_name}"
+        origin_path = ""
 
         origin_id = "api-gateway-origin"
 
