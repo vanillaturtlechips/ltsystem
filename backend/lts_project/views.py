@@ -5,10 +5,8 @@ def health_check(request):
     return JsonResponse({"status": "LTS Backend is Healthy!"})
 
 def get_traffic_data(request):
-    """test API Ep"""
-    mock_data = {
-        "vehicle_id": "G-2321 (from Django)",
-        "speed": 55,
-        "status": "normal"
+    data = {
+        "status": "success",
+        "message": "Traffic data API endpoint reached!"
     }
-    return JsonResponse(mock_data)
+    return JsonResponse(data)
