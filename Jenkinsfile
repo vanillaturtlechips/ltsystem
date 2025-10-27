@@ -65,7 +65,6 @@ pipeline {
             }
         }
 
-
         stage('Force ECS Deployment') {
                 steps {
                     echo "Forcing new deployment on ECS service..."
@@ -73,11 +72,7 @@ pipeline {
                         --service lts_app_service \
                         --force-new-deployment \
                         --region ${AWS_REGION}"
-                }
-            }
-        } 
-    }
-        
-    
+             }
+         }
     }
 } 
