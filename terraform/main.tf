@@ -1191,7 +1191,7 @@ resource "aws_cloudfront_distribution" "lts_cdn" {
     
     enabled = true
     is_ipv6_enabled = true
-    default_root_object = "index.html"
+    # default_root_object = "index.html"
 
     default_cache_behavior {
         allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
