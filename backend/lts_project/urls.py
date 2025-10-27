@@ -1,5 +1,4 @@
 from django.urls import path
-from lts_app import views 
 from . import views
 
 urlpatterns = [
