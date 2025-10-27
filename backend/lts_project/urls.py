@@ -1,5 +1,7 @@
 from django.urls import path
 from lts_app import views 
+from . import views
+
 urlpatterns = [
 
     path('', views.health_check, name='health_check'), 
