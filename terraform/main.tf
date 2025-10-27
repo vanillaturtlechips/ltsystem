@@ -1057,7 +1057,7 @@ resource "aws_api_gateway_integration" "lts_api_proxy_integration" {
     type = "HTTP_PROXY"
     integration_http_method = "ANY"
 
-    uri = "http://${aws_lb.lts_alb.dns_name}/{proxy}"
+    uri = "http://${aws_lb.lts_alb.dns_name}"
 
     request_parameters = {
         "integration.request.path.proxy" = "method.request.path.proxy"
