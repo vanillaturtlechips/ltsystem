@@ -1255,7 +1255,7 @@ resource "aws_api_gateway_authorizer" "lts_cognito_auth" {
     type = "COGNITO_USER_POOLS"
     provider_arns = [aws_cognito_user_pool.lts_user_pool.arn]
 
-    identity_source = "method.request.header.Autorization"
+    identity_source = "method.request.header.Authorization"
 }
 
 resource "aws_elasticache_subnet_group" "lts_cache_subnet_group" {
