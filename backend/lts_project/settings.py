@@ -95,3 +95,33 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# settings.py 파일 맨 아래 추가
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO', # INFO 레벨 이상 로그 출력
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        # lts_project 앱의 로거 설정 (views.py에서 사용한 로거)
+        'lts_project': {
+             'handlers': ['console'],
+             'level': 'INFO',
+             'propagate': False,
+        }
+    },
+}
