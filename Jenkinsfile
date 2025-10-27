@@ -64,6 +64,20 @@ pipeline {
                 sh "cd ${TF_DIR} && terraform apply -auto-approve tfplan"
             }
         }
-    } 
 
+
+        stage('Force ECS Deployment') {
+                steps {
+                    echo "Forcing new deployment on ECS service..."
+                    sh "aws ecs update-service --cluster lts-cluster \
+                        --service lts_app_service \
+                        --force-new-deployment \
+                        --region ${AWS_REGION}"
+                }
+            }
+        } 
+    }
+        
+    
+    }
 } 
