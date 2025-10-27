@@ -1,8 +1,5 @@
 pipeline {
-    
     agent any 
-
-    
     environment {
         AWS_REGION = 'ap-northeast-2'
         TF_DIR     = 'terraform' 
@@ -11,11 +8,7 @@ pipeline {
         ECR_REPO_NAME  = 'lts-app-repo'
         IMAGE_TAG      = "latest"
     }
-
-    
     stages {
-        
-      
         stage('Checkout') {
             steps {
                 echo "Checking out source code from Git..."
@@ -28,7 +21,7 @@ pipeline {
                 echo "Building and pushing Docker image..."
                 sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-                sh "cd backend && docker build -t ${ECR_REPO_NAME}:${IMAGE_TAG} ."
+                sh "cd backend && docker build --no-cache -t ${ECR_REPO_NAME}:${IMAGE_TAG} ."
 
                 sh "docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}"
 
