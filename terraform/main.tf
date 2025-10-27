@@ -274,6 +274,8 @@ resource "aws_db_instance" "lts_db" {
     engine = "mysql"
     engine_version = "8.0"
 
+    db_name = "lts_db"
+
     username = "admin"
     password = aws_secretsmanager_secret_version.lts_db_password_version.secret_string
 
@@ -503,7 +505,7 @@ resource "aws_ecs_task_definition" "lts_app_task" {
             environment = [
                 {
                     name = "DATABASE_URL"
-                    value = "mysql://admin:${aws_secretsmanager_secret_version.lts_db_password_version.secret_string}@${aws_db_instance.lts_db.endpoint}/${aws_db_instance.lts_db.identifier}"   
+                    value = "mysql://admin:${aws_secretsmanager_secret_version.lts_db_password_version.secret_string}@${aws_db_instance.lts_db.endpoint}/${aws_db_instance.lts_db.db_name}"  
                 },
                 {
                     name = "DEBUG"
