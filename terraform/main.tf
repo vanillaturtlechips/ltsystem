@@ -1006,24 +1006,19 @@ resource "aws_api_gateway_rest_api" "lts_api" {
     binary_media_types = ["*/*/"]
 }
 
-resource "aws_api_gateway_resource" "lts_api_root" {
-  rest_api_id = aws_api_gateway_rest_api.lts_api.id
-  parent_id   = aws_api_gateway_rest_api.lts_api.root_resource_id
-  path_part   = "" 
-}
+
 
 resource "aws_api_gateway_method" "lts_api_root_get_method" {
   rest_api_id   = aws_api_gateway_rest_api.lts_api.id
-  resource_id   = aws_api_gateway_resource.lts_api_root.id
+  resource_id   = aws_api_gateway_rest_api.lts_api.root_resource_id
   http_method   = "GET"
   authorization = "NONE" # 인증 사용 안 함
 }
 
 resource "aws_api_gateway_integration" "lts_api_root_get_integration" {
   rest_api_id = aws_api_gateway_rest_api.lts_api.id
-  resource_id = aws_api_gateway_resource.lts_api_root.id
+  resource_id = aws_api_gateway_rest_api.lts_api.root_resource_id
   http_method = aws_api_gateway_method.lts_api_root_get_method.http_method
-
   type                    = "HTTP_PROXY"
   integration_http_method = "GET" 
   uri                     = "http://${aws_lb.lts_alb.dns_name}/" 
@@ -1078,7 +1073,6 @@ resource "aws_api_gateway_deployment" "lts_api_deployment" {
             aws_api_gateway_method.lts_api_proxy_method.id,
             aws_api_gateway_integration.lts_api_proxy_integration.id,
 
-            aws_api_gateway_resource.lts_api_root.id,
             aws_api_gateway_method.lts_api_root_get_method.id,
             aws_api_gateway_integration.lts_api_root_get_integration.id
         ]))
