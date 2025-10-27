@@ -1363,6 +1363,12 @@ resource "aws_instance" "lts_jenkins_server" {
   iam_instance_profile   = aws_iam_instance_profile.lts_jenkins_profile.name  # 추가 권한 필요
 
   user_data = file("${path.module}/jenkins-userdata.sh")
+  
+  lifecycle {
+    ignore_changes = [
+      user_data
+    ]
+  }
 
   tags = {
     Name = "lts-jenkins-server"

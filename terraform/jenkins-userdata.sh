@@ -5,6 +5,8 @@ exec 2>&1
 
 echo "========== Starting Jenkins Installation =========="
 
+echo "ip_resolve=4" | sudo tee /etc/yum/vars/ip_resolve
+
 # 시스템 업데이트
 sudo yum update -y
 
