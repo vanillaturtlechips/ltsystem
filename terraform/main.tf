@@ -1055,9 +1055,9 @@ resource "aws_api_gateway_integration" "lts_api_proxy_integration" {
     http_method = aws_api_gateway_method.lts_api_proxy_method.http_method
 
     type = "HTTP_PROXY"
-    integration_http_method = "ANY"
+    integration_http_method = "GET"
 
-    uri = "http://${aws_lb.lts_alb.dns_name}"
+    uri = "http://${aws_lb.lts_alb.dns_name}/{proxy}"
 
     request_parameters = {
         "integration.request.path.proxy" = "method.request.path.proxy"
