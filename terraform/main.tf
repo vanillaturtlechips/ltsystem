@@ -32,7 +32,7 @@ provider "aws" {
 }
 
 resource "aws_secretsmanager_secret" "lts_db_password_secret" {
-    name = "lts/db/password"
+    name = "lts/db/password-go-stack"
     description = "RDS database password for LTS system"
 
     tags = {
@@ -506,17 +506,9 @@ resource "aws_ecs_task_definition" "lts_app_task" {
                 {
                     name = "DATABASE_URL"
                     value = "mysql://admin:${aws_secretsmanager_secret_version.lts_db_password_version.secret_string}@${aws_db_instance.lts_db.endpoint}/${aws_db_instance.lts_db.db_name}"  
-                },
-                {
-                    name = "DEBUG"
-                    value = "False"
                 }
                 ]
             secrets = [
-                {
-                    name = "SECRET_KEY"
-                    valueFrom = aws_secretsmanager_secret.lts_django_secret_key.arn
-                },
                 {
                     name = "DB_PASSWORD_PLACEHOLDER"
                     valueFrom = aws_secretsmanager_secret.lts_db_password_secret.arn
@@ -1443,16 +1435,16 @@ resource "aws_iam_role_policy_attachment" "jenkins_admin_policy" {
 }
 
 
-resource "aws_secretsmanager_secret" "lts_django_secret_key" {
-    name = "lts/django/secretkey"
-    description = "Django SECRET_KEY for LTS system"
-    recovery_window_in_days = 0
-}
+# resource "aws_secretsmanager_secret" "lts_django_secret_key" {
+#     name = "lts/django/secretkey"
+#     description = "Django SECRET_KEY for LTS system"
+#     recovery_window_in_days = 0
+# }
 
-resource "aws_secretsmanager_secret_version" "lts_django_secret_key_version" {
-    secret_id = aws_secretsmanager_secret.lts_django_secret_key.id
-    secret_string = "django-insecure-dummy-key-for-lts-project"
-}
+# resource "aws_secretsmanager_secret_version" "lts_django_secret_key_version" {
+#     secret_id = aws_secretsmanager_secret.lts_django_secret_key.id
+#     secret_string = "django-insecure-dummy-key-for-lts-project"
+# }
 
 resource "aws_iam_policy" "lts_ecs_task_exec_secrets_policy" {
     name = "lts-ecs-task-exec-secrets-policy"
@@ -1466,7 +1458,7 @@ resource "aws_iam_policy" "lts_ecs_task_exec_secrets_policy" {
                 Action   = ["secretsmanager:GetSecretValue"]
                 Resource = [
                     aws_secretsmanager_secret.lts_db_password_secret.arn,
-                    aws_secretsmanager_secret.lts_django_secret_key.arn
+                    # aws_secretsmanager_secret.lts_django_secret_key.arn
                 ]
             }
         ]
