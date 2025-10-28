@@ -321,8 +321,8 @@ resource "aws_security_group" "lts_app_sg" {
 
     ingress {
         description = "HTTP from ALB"
-        from_port = 80
-        to_port = 80
+        from_port = 8080
+        to_port = 8080
         protocol = "tcp"
         security_groups = [aws_security_group.lts_alb_sg.id]
     }
@@ -389,8 +389,8 @@ resource "aws_lb" "lts_alb" {
 }
 
 resource "aws_lb_target_group" "lts_app_tg" {
-    name = "lts-app-tg"
-    port = 80
+    name = "lts-app-tg-v2"
+    port = 8080
     protocol = "HTTP"
     vpc_id = aws_vpc.lts_vpc.id
 
@@ -398,7 +398,7 @@ resource "aws_lb_target_group" "lts_app_tg" {
     target_type = "ip"
 
     lifecycle {
-        create_before_destroy = false
+        create_before_destroy = true
     }
 
     health_check {
@@ -497,15 +497,15 @@ resource "aws_ecs_task_definition" "lts_app_task" {
             essential = true
             portMappings = [
                 {
-                    containerPort = 80
-                    hostPort = 80
+                    containerPort = 8080
+                    hostPort = 8080
                 }
                 ]
 
             environment = [
                 {
                     name = "DATABASE_URL"
-                    value = "mysql://admin:${aws_secretsmanager_secret_version.lts_db_password_version.secret_string}@${aws_db_instance.lts_db.endpoint}/${aws_db_instance.lts_db.db_name}"  
+                    value = "admin:${aws_secretsmanager_secret_version.lts_db_password_version.secret_string}@tcp(${aws_db_instance.lts_db.endpoint})/${aws_db_instance.lts_db.db_name}"  
                 }
                 ]
             secrets = [
@@ -563,7 +563,7 @@ resource "aws_ecs_service" "lts_app_service" {
     load_balancer {
         target_group_arn = aws_lb_target_group.lts_app_tg.arn
         container_name = "lts-app-container"
-        container_port = 80
+        container_port = 8080
     }
 
     force_new_deployment = true
@@ -1032,8 +1032,8 @@ resource "aws_api_gateway_method" "lts_api_proxy_method" {
     rest_api_id = aws_api_gateway_rest_api.lts_api.id
     resource_id = aws_api_gateway_resource.lts_api_proxy.id
     http_method = "ANY"
-    authorization = "COGNITO_USER_POOLS"
-    authorizer_id = aws_api_gateway_authorizer.lts_cognito_auth.id
+    authorization = "NONE"
+    # authorizer_id = aws_api_gateway_authorizer.lts_cognito_auth.id
 
     request_parameters = {
 
